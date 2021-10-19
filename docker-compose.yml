@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  redis:
+    image: "redis:alpine"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "4"
+    restart: always
+    command: "redis-server --protected-mode no --appendonly yes"
+    volumes:
+      - .rcafe/docker/redis:/data
+  backend:
+    depends_on:
+      - redis
+    ports:
+        - "8000:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "4"
+    environment:
+      - ENV_FOR_DYNACONF=stage
+    image: rozum/cafe-backend:1.2.0-dev-docker-builds
+    volumes:
+      - .rcafe/backend/database:/home/rcafe/database
+      - .rcafe/backend/localconfigs:/home/rcafe/localconfigs
+      - .rcafe/backend/static:/home/rcafe/static
+      - .rcafe/backend/logs:/home/rcafe/logs
+      
